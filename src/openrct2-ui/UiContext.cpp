@@ -41,6 +41,7 @@
 #include <openrct2/interface/InteractiveConsole.h>
 #include <openrct2/localisation/StringIds.h>
 #include <openrct2/platform/Platform.h>
+#include <openrct2/PlatformEnvironment.h>
 #include <openrct2/scripting/ScriptEngine.h>
 #include <openrct2/title/TitleSequencePlayer.h>
 #include <openrct2/ui/UiContext.h>
@@ -118,6 +119,24 @@ public:
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0)
         {
             SDLException::Throw("SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK)");
+        }
+        Console::WriteLine("Current status of RefreshDPIScaling = %d", gConfigGeneral.RefreshDPIScaling);
+        if (gConfigGeneral.RefreshDPIScaling)
+        {
+            float ddpi, hdpi, vdpi;
+            if (SDL_GetDisplayDPI(0,&ddpi, &hdpi, &vdpi))
+            {
+                // Signifies error has occured, DPI was not received
+                SDLException::Throw(SDL_GetError());
+            } else
+            {
+                // Divide DPI by default (96.0f)
+                gConfigGeneral.WindowScale = ddpi / 96.0f;
+                gConfigGeneral.RefreshDPIScaling = false;
+                Console::WriteLine("Changing DPI scaling to %f\n", gConfigGeneral.WindowScale);
+                auto configPath = env->GetFilePath(PATHID::CONFIG);
+                ConfigSave(configPath.c_str());
+            }
         }
         _cursorRepository.LoadCursors();
         _shortcutManager.LoadUserBindings();
@@ -603,7 +622,7 @@ public:
     void CreateWindow() override
     {
         SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, gConfigGeneral.MinimizeFullscreenFocusLoss ? "1" : "0");
-
+        LOG_VERBOSE("CREATEWINDOW IS HERE!");
         // Set window position to default display
         int32_t defaultDisplay = std::clamp(gConfigGeneral.DefaultDisplay, 0, 0xFFFF);
         auto windowPos = ScreenCoordsXY{ static_cast<int32_t>(SDL_WINDOWPOS_UNDEFINED_DISPLAY(defaultDisplay)),
