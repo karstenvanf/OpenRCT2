@@ -124,19 +124,16 @@ public:
         if (gConfigGeneral.RefreshDPIScaling)
         {
             float ddpi, hdpi, vdpi;
-            if (SDL_GetDisplayDPI(0,&ddpi, &hdpi, &vdpi))
+            if (!SDL_GetDisplayDPI(0,&ddpi, &hdpi, &vdpi))
             {
-                // Signifies error has occured, DPI was not received
-                SDLException::Throw(SDL_GetError());
-            } else
-            {
-                // Divide DPI by default (96.0f)
+                // If DPI can be read, divide DPI by regular DPI (96.0f)
                 gConfigGeneral.WindowScale = ddpi / 96.0f;
-                gConfigGeneral.RefreshDPIScaling = false;
+
                 Console::WriteLine("Changing DPI scaling to %f\n", gConfigGeneral.WindowScale);
-                auto configPath = env->GetFilePath(PATHID::CONFIG);
-                ConfigSave(configPath.c_str());
             }
+            gConfigGeneral.RefreshDPIScaling = false;
+            auto configPath = env->GetFilePath(PATHID::CONFIG);
+            ConfigSave(configPath.c_str());
         }
         _cursorRepository.LoadCursors();
         _shortcutManager.LoadUserBindings();
