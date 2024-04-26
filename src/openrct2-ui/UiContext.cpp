@@ -126,8 +126,8 @@ public:
             float ddpi, hdpi, vdpi;
             if (!SDL_GetDisplayDPI(0,&ddpi, &hdpi, &vdpi))
             {
-                // If DPI can be read, divide DPI by regular DPI (96.0f)
-                gConfigGeneral.WindowScale = ddpi / 96.0f;
+                // If DPI can be read, divide DPI by regular DPI (96.0f) and round to nearest 0.25
+                gConfigGeneral.WindowScale = std::round(ddpi / 96.0f * 4.0) / 4.0;
 
                 Console::WriteLine("Changing DPI scaling to %f\n", gConfigGeneral.WindowScale);
             }
