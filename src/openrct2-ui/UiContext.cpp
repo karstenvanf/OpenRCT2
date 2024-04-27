@@ -120,7 +120,6 @@ public:
         {
             SDLException::Throw("SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK)");
         }
-        Console::WriteLine("Current status of RefreshDPIScaling = %d", gConfigGeneral.RefreshDPIScaling);
         if (gConfigGeneral.RefreshDPIScaling)
         {
             float ddpi, hdpi, vdpi;
@@ -129,7 +128,7 @@ public:
                 // If DPI can be read, divide DPI by regular DPI (96.0f) and round to nearest 0.25
                 gConfigGeneral.WindowScale = std::round(ddpi / 96.0f * 4.0) / 4.0;
 
-                Console::WriteLine("Changing DPI scaling to %f\n", gConfigGeneral.WindowScale);
+                LOG_VERBOSE("Changing DPI scaling to %f\n", gConfigGeneral.WindowScale);
             }
             gConfigGeneral.RefreshDPIScaling = false;
             auto configPath = env->GetFilePath(PATHID::CONFIG);
